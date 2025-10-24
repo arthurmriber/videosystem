@@ -2519,10 +2519,14 @@
                         console.log(`✂️ Cortando vídeo: ${cmd.startTime}s - ${cmd.endTime}s`);
                         const duration = cmd.endTime - cmd.startTime;
                         await ffmpeg.run(
-                            '-i', inputFile,
                             '-ss', cmd.startTime.toString(),
+                            '-i', inputFile,
                             '-t', duration.toString(),
-                            '-c', 'copy',
+                            '-c:v', 'libx264',
+                            '-preset', 'fast',
+                            '-crf', '23',
+                            '-c:a', 'aac',
+                            '-b:a', '128k',
                             tempOutput
                         );
                     } else if (cmd.type === 'crop') {
@@ -2533,6 +2537,8 @@
                             '-c:v', 'libx264',
                             '-preset', 'fast',
                             '-crf', '23',
+                            '-c:a', 'aac',
+                            '-b:a', '128k',
                             tempOutput
                         );
                     }
