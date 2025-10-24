@@ -872,11 +872,14 @@
                 videoUrl = videoUrl.replace('http://', 'https://');
             }
             
+            // Usa proxy para evitar problemas de CORS com COEP/COOP
+            const videoUrlForPlayer = videoUrl ? `/proxy-video?url=${encodeURIComponent(videoUrl)}` : '';
+            
             container.innerHTML = `
                 <div class="video-detail-container">
                     <div class="video-detail-player">
-                        <video id="custom-video-player" poster="${details.thumbnail}" preload="metadata" onerror="handleVideoError(this)">
-                            <source src="${videoUrl}" type="video/mp4">
+                        <video id="custom-video-player" poster="${details.thumbnail}" preload="metadata" crossorigin="anonymous" onerror="handleVideoError(this)">
+                            <source src="${videoUrlForPlayer}" type="video/mp4">
                             Seu navegador não suporta vídeo HTML5.
                         </video>
                         <div class="custom-player-overlay" onclick="togglePlay()">
@@ -1185,9 +1188,11 @@
                 await ffmpeg.load();
                 console.log('✅ FFmpeg carregado com sucesso!');
                 
-                // Faz o download do vídeo usando fetchFile
+                // Faz o download do vídeo usando proxy para evitar CORS
                 console.log('📥 Baixando vídeo:', currentVideoUrl);
-                const videoData = await fetchFile(currentVideoUrl);
+                const proxyUrl = `/proxy-video?url=${encodeURIComponent(currentVideoUrl)}`;
+                console.log('🔗 Usando proxy:', proxyUrl);
+                const videoData = await fetchFile(proxyUrl);
                 console.log('✅ Vídeo baixado, tamanho:', videoData.length, 'bytes');
                 
                 // Escreve o arquivo no sistema de arquivos virtual do ffmpeg
