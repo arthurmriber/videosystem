@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Escolha o tipo de vídeo</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -393,6 +394,219 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Modal de corte de vídeo */
+        .cut-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .cut-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cut-modal-content {
+            background: #1a1a1a;
+            border: 1px solid #252525;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .cut-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .cut-modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #FFD11A;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .close-modal:hover {
+            color: #FFD11A;
+        }
+
+        .cut-preview-container {
+            margin-bottom: 2rem;
+        }
+
+        .cut-preview-video {
+            width: 100%;
+            border-radius: 8px;
+            background: #000;
+        }
+
+        .cut-time-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .time-input-group {
+            background: #252525;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .time-input-label {
+            font-size: 0.875rem;
+            color: #FFD11A;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+        }
+
+        .time-inputs {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .time-input {
+            flex: 1;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 0.5rem;
+            color: #fff;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .time-input:focus {
+            outline: none;
+            border-color: #FFD11A;
+        }
+
+        .time-separator {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .preview-slider-container {
+            margin-bottom: 2rem;
+        }
+
+        .preview-slider-label {
+            font-size: 0.875rem;
+            color: #aaa;
+            margin-bottom: 0.5rem;
+        }
+
+        .preview-slider {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .preview-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #FFD11A;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .preview-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: #FFD11A;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        .cut-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .cut-button {
+            background: #FFD11A;
+            color: #141414;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .cut-button:hover:not(:disabled) {
+            background: #FFE066;
+        }
+
+        .cut-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .cut-button-secondary {
+            background: #1a1a1a;
+            color: #fff;
+            border: 1px solid #252525;
+        }
+
+        .cut-button-secondary:hover {
+            border-color: #FFD11A;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            z-index: 10;
+        }
+
+        .loading-text {
+            margin-top: 1rem;
+            color: #FFD11A;
+            font-size: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -432,6 +646,61 @@
         </div>
     </div>
 
+    <!-- Modal de Corte de Vídeo -->
+    <div class="cut-modal" id="cut-modal">
+        <div class="cut-modal-content">
+            <div class="cut-modal-header">
+                <h2 class="cut-modal-title">Cortar Vídeo</h2>
+                <button class="close-modal" onclick="closeCutModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="cut-preview-container">
+                <video id="cut-preview-video" class="cut-preview-video" controls></video>
+            </div>
+            
+            <div class="cut-time-controls">
+                <div class="time-input-group">
+                    <div class="time-input-label">Início</div>
+                    <div class="time-inputs">
+                        <input type="number" id="start-minutes" class="time-input" value="0" min="0" placeholder="M">
+                        <span class="time-separator">:</span>
+                        <input type="number" id="start-seconds" class="time-input" value="0" min="0" max="59" placeholder="S">
+                        <span class="time-separator">.</span>
+                        <input type="number" id="start-milliseconds" class="time-input" value="0" min="0" max="99" placeholder="MS">
+                    </div>
+                </div>
+                
+                <div class="time-input-group">
+                    <div class="time-input-label">Fim</div>
+                    <div class="time-inputs">
+                        <input type="number" id="end-minutes" class="time-input" value="0" min="0" placeholder="M">
+                        <span class="time-separator">:</span>
+                        <input type="number" id="end-seconds" class="time-input" value="10" min="0" max="59" placeholder="S">
+                        <span class="time-separator">.</span>
+                        <input type="number" id="end-milliseconds" class="time-input" value="0" min="0" max="99" placeholder="MS">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="preview-slider-container">
+                <div class="preview-slider-label">Visualizar: <span id="preview-time">0:00.00</span></div>
+                <input type="range" id="preview-slider" class="preview-slider" min="0" max="100" value="0" step="0.1">
+            </div>
+            
+            <div class="cut-actions">
+                <button class="cut-button cut-button-secondary" onclick="closeCutModal()">
+                    Cancelar
+                </button>
+                <button class="cut-button" id="save-cut-button" onclick="saveCutVideo()">
+                    <i class="fas fa-scissors"></i>
+                    Salvar Corte
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentQuery = '';
 
@@ -439,6 +708,29 @@
         window.addEventListener('DOMContentLoaded', () => {
             document.body.classList.add('library-view');
             loadVideos();
+            
+            // Verifica se FFmpeg foi carregado
+            setTimeout(() => {
+                console.log('🔍 Verificando disponibilidade do FFmpeg...');
+                console.log('typeof FFmpeg:', typeof FFmpeg);
+                
+                if (typeof FFmpeg !== 'undefined' && typeof FFmpeg.createFFmpeg !== 'undefined') {
+                    console.log('✅ FFmpeg está disponível globalmente!');
+                    console.log('FFmpeg keys:', Object.keys(FFmpeg));
+                    const { createFFmpeg, fetchFile } = FFmpeg;
+                    console.log('✅ createFFmpeg disponível:', typeof createFFmpeg);
+                    console.log('✅ fetchFile disponível:', typeof fetchFile);
+                } else {
+                    console.log('❌ FFmpeg NÃO está disponível ainda');
+                    console.log('Verificando novamente em 2 segundos...');
+                    setTimeout(() => {
+                        console.log('Tentativa 2 - typeof FFmpeg:', typeof FFmpeg);
+                        if (typeof FFmpeg !== 'undefined' && typeof FFmpeg.createFFmpeg !== 'undefined') {
+                            console.log('✅ FFmpeg agora está disponível!');
+                        }
+                    }, 2000);
+                }
+            }, 1000);
         });
 
         function goBackFromDetail() {
@@ -611,8 +903,11 @@
                     </div>
                     
                     <div style="display: flex; gap: 1rem; margin: 2rem 0;">
-                        <button onclick="downloadVideo('${videoUrl}', '${details.translated_headline || details.headline}')" style="background: #FFD11A; color: #141414; border: none; border-radius: 8px; padding: 0.75rem 1.5rem; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">
+                        <button onclick="downloadVideo('${videoUrl.replace(/'/g, "\\'")}', '${(details.translated_headline || details.headline).replace(/'/g, "\\'")}')" style="background: #FFD11A; color: #141414; border: none; border-radius: 8px; padding: 0.75rem 1.5rem; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">
                             <i class="fas fa-download"></i> Baixar Vídeo
+                        </button>
+                        <button onclick="openCutModal('${videoUrl.replace(/'/g, "\\'")}', '${(details.translated_headline || details.headline).replace(/'/g, "\\'")}')" style="background: #1a1a1a; color: #fff; border: 1px solid #252525; border-radius: 8px; padding: 0.75rem 1.5rem; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">
+                            <i class="fas fa-cut"></i> Cortar Vídeo
                         </button>
                         ${details.translated_script || details.script ? `
                         <button onclick="copyScript('${(details.translated_script || details.script).replace(/'/g, "\\'")}', this)" style="background: #1a1a1a; color: #fff; border: 1px solid #252525; border-radius: 8px; padding: 0.75rem 1.5rem; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">
@@ -745,6 +1040,7 @@
                 const a = document.createElement('a');
                 a.href = videoUrl;
                 a.download = `${title.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.mp4`;
+                a.target = '_blank';
                 a.click();
             } catch (error) {
                 console.error('Erro ao baixar vídeo:', error);
@@ -767,6 +1063,192 @@
                 console.error('Erro ao copiar:', error);
                 alert('Erro ao copiar script. Tente selecionar manualmente.');
             });
+        }
+
+        // Variáveis globais para o modal de corte
+        let currentVideoUrl = '';
+        let currentVideoTitle = '';
+        let currentVideoDuration = 0;
+
+        function openCutModal(videoUrl, title) {
+            currentVideoUrl = videoUrl;
+            currentVideoTitle = title;
+            
+            const modal = document.getElementById('cut-modal');
+            const previewVideo = document.getElementById('cut-preview-video');
+            
+            modal.classList.add('active');
+            
+            // Carrega o vídeo na preview
+            previewVideo.src = videoUrl;
+            
+            // Espera o vídeo carregar para pegar a duração
+            previewVideo.addEventListener('loadedmetadata', () => {
+                currentVideoDuration = previewVideo.duration;
+                setupCutPreview();
+            }, { once: true });
+        }
+
+        function closeCutModal() {
+            const modal = document.getElementById('cut-modal');
+            const previewVideo = document.getElementById('cut-preview-video');
+            
+            modal.classList.remove('active');
+            previewVideo.pause();
+            previewVideo.src = '';
+        }
+
+        function setupCutPreview() {
+            const previewVideo = document.getElementById('cut-preview-video');
+            const slider = document.getElementById('preview-slider');
+            const previewTime = document.getElementById('preview-time');
+            
+            // Configura o slider com a duração do vídeo
+            slider.max = currentVideoDuration;
+            
+            // Atualiza a preview conforme o slider muda
+            slider.addEventListener('input', (e) => {
+                const time = parseFloat(e.target.value);
+                previewVideo.currentTime = time;
+                previewTime.textContent = formatTime(time);
+            });
+            
+            // Inicializa o tempo
+            previewTime.textContent = formatTime(0);
+            
+            // Atualiza o tempo conforme o vídeo reproduz
+            previewVideo.addEventListener('timeupdate', () => {
+                if (!slider.matches(':active')) {
+                    slider.value = previewVideo.currentTime;
+                    previewTime.textContent = formatTime(previewVideo.currentTime);
+                }
+            });
+        }
+
+        function getCutTime(isStart) {
+            const minutes = parseInt(document.getElementById(`${isStart ? 'start' : 'end'}-minutes`).value) || 0;
+            const seconds = parseInt(document.getElementById(`${isStart ? 'start' : 'end'}-seconds`).value) || 0;
+            const milliseconds = parseInt(document.getElementById(`${isStart ? 'start' : 'end'}-milliseconds`).value) || 0;
+            
+            return minutes * 60 + seconds + milliseconds / 100;
+        }
+
+        async function saveCutVideo() {
+            const startTime = getCutTime(true);
+            const endTime = getCutTime(false);
+            
+            if (endTime <= startTime) {
+                alert('O tempo de fim deve ser maior que o tempo de início!');
+                return;
+            }
+            
+            if (endTime > currentVideoDuration) {
+                alert('O tempo de fim não pode ser maior que a duração do vídeo!');
+                return;
+            }
+            
+            const button = document.getElementById('save-cut-button');
+            const modalContent = document.querySelector('.cut-modal-content');
+            
+            // Mostra loading
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+            
+            const loadingOverlay = document.createElement('div');
+            loadingOverlay.className = 'loading-overlay';
+            loadingOverlay.innerHTML = `
+                <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #FFD11A;"></i>
+                <div class="loading-text">Cortando vídeo, aguarde...</div>
+            `;
+            modalContent.style.position = 'relative';
+            modalContent.appendChild(loadingOverlay);
+            
+            try {
+                console.log('📋 === Iniciando corte de vídeo ===');
+                
+                // Verifica se FFmpeg está disponível (usando a variável global correta)
+                if (typeof FFmpeg === 'undefined' || typeof FFmpeg.createFFmpeg === 'undefined') {
+                    console.error('❌ FFmpeg não está disponível!');
+                    throw new Error('FFmpeg ainda não foi carregado. Aguarde alguns segundos e tente novamente.');
+                }
+                
+                console.log('✅ FFmpeg encontrado! Criando instância...');
+                
+                // Cria instância do FFmpeg
+                const { createFFmpeg, fetchFile } = FFmpeg;
+                const ffmpeg = createFFmpeg({ 
+                    log: true,
+                    corePath: 'https://unpkg.com/@ffmpeg/core@0.11.0/dist/ffmpeg-core.js'
+                });
+                
+                console.log('🔄 Carregando FFmpeg (isso pode demorar alguns segundos)...');
+                await ffmpeg.load();
+                console.log('✅ FFmpeg carregado com sucesso!');
+                
+                // Faz o download do vídeo usando fetchFile
+                console.log('📥 Baixando vídeo:', currentVideoUrl);
+                const videoData = await fetchFile(currentVideoUrl);
+                console.log('✅ Vídeo baixado, tamanho:', videoData.length, 'bytes');
+                
+                // Escreve o arquivo no sistema de arquivos virtual do ffmpeg
+                console.log('💾 Escrevendo arquivo no sistema virtual...');
+                ffmpeg.FS('writeFile', 'input.mp4', videoData);
+                
+                // Calcula a duração do corte
+                const duration = endTime - startTime;
+                console.log('✂️ Cortando vídeo de', startTime, 'até', endTime, '(duração:', duration, 'segundos)');
+                
+                // Corta o vídeo usando ffmpeg
+                console.log('⚙️ Processando corte com FFmpeg...');
+                await ffmpeg.run(
+                    '-ss', startTime.toString(),
+                    '-i', 'input.mp4',
+                    '-t', duration.toString(),
+                    '-c', 'copy',
+                    'output.mp4'
+                );
+                console.log('✅ Corte concluído!');
+                
+                // Lê o arquivo cortado
+                const data = ffmpeg.FS('readFile', 'output.mp4');
+                console.log('📤 Arquivo cortado criado, tamanho:', data.length, 'bytes');
+                
+                // Cria o blob e faz o download
+                console.log('💾 Criando blob e iniciando download...');
+                const videoBlob = new Blob([data.buffer], { type: 'video/mp4' });
+                const url = URL.createObjectURL(videoBlob);
+                
+                const filename = `${currentVideoTitle.replace(/[^a-z0-9]/gi, '_')}_corte_${Date.now()}.mp4`;
+                console.log('📥 Fazendo download:', filename);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
+                
+                // Limpa
+                URL.revokeObjectURL(url);
+                ffmpeg.FS('unlink', 'input.mp4');
+                ffmpeg.FS('unlink', 'output.mp4');
+                
+                console.log('✅ Download concluído com sucesso!');
+                
+                // Feedback de sucesso
+                button.innerHTML = '<i class="fas fa-check"></i> Download concluído!';
+                setTimeout(() => {
+                    closeCutModal();
+                }, 1500);
+                
+            } catch (error) {
+                console.error('❌ Erro ao cortar vídeo:', error);
+                alert(error.message || 'Erro ao cortar vídeo. Tente novamente.');
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-scissors"></i> Salvar Corte';
+            } finally {
+                if (loadingOverlay.parentNode) {
+                    loadingOverlay.parentNode.removeChild(loadingOverlay);
+                }
+            }
         }
     </script>
     
