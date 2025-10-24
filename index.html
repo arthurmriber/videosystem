@@ -867,9 +867,9 @@
                 videoUrl = details.url || details.thumbnail;
             }
             
-            // Força HTTP (alguns navegadores convertem automaticamente para HTTPS)
-            if (videoUrl && videoUrl.startsWith('https://')) {
-                videoUrl = videoUrl.replace('https://', 'http://');
+            // Converte HTTP para HTTPS (requerido em páginas HTTPS)
+            if (videoUrl && videoUrl.startsWith('http://')) {
+                videoUrl = videoUrl.replace('http://', 'https://');
             }
             
             container.innerHTML = `
