@@ -1331,13 +1331,13 @@
                 } else {
                     // Carrega dinamicamente
                     try {
-                        const ffmpegModule = await import('https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js');
-                        const utilModule = await import('https://unpkg.com/@ffmpeg/util@0.12.1/dist/esm/index.js');
+                        const ffmpegModule = await import('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js');
+                        const utilModule = await import('https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/esm/index.js');
                         FFmpeg = ffmpegModule.FFmpeg;
                         fetchFile = utilModule.fetchFile;
                         toBlobURL = utilModule.toBlobURL;
                     } catch (importError) {
-                        throw new Error('Não foi possível carregar FFmpeg. Use HTTPS ou faça deploy.');
+                        throw new Error('Não foi possível carregar FFmpeg: ' + importError.message);
                     }
                 }
                 const ffmpeg = new FFmpeg();
@@ -1348,8 +1348,7 @@
                 });
                 
                 // Carrega FFmpeg com cores usando toBlobURL
-                const protocol = window.location.protocol === 'https:' ? 'https://' : 'http://';
-                const baseURL = `${protocol}cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm`;
+                const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm';
                 await ffmpeg.load({
                     coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
                     wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
@@ -1405,18 +1404,19 @@
     
     <!-- FFmpeg.wasm via CDN -->
     <script type="module">
-        try {
-            // Tenta carregar via unpkg HTTPS
-            const { FFmpeg } = await import('https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js');
-            const { fetchFile, toBlobURL } = await import('https://unpkg.com/@ffmpeg/util@0.12.1/dist/esm/index.js');
-            
-            window.FFmpegModule = { FFmpeg, fetchFile, toBlobURL };
-        } catch (error) {
-            console.error('Erro ao carregar FFmpeg:', error);
-            // Fallback - mostra erro amigável
-            window.FFmpegModule = null;
-            alert('Erro ao carregar FFmpeg. Use HTTPS ou atualize seu navegador.');
-        }
+        (async () => {
+            try {
+                // Importa FFmpeg e utilitários
+                const { FFmpeg } = await import('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js');
+                const { fetchFile, toBlobURL } = await import('https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/esm/index.js');
+                
+                window.FFmpegModule = { FFmpeg, fetchFile, toBlobURL };
+                console.log('FFmpeg carregado com sucesso');
+            } catch (error) {
+                console.error('Erro ao carregar FFmpeg:', error);
+                window.FFmpegModule = null;
+            }
+        })();
     </script>
 </body>
 </html>
