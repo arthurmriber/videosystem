@@ -720,7 +720,9 @@
 
                 <div class="action-buttons">
                     <button class="action-button" onclick="goBackFromEditor()">Cancelar</button>
-                    <button class="action-button primary" onclick="processVideo()">Processar Vídeo</button>
+                    <button class="action-button primary" onclick="processVideo()">
+                        <i class="fas fa-download"></i> Baixar Video + Tempos
+                    </button>
                 </div>
             </div>
         </div>
@@ -1315,109 +1317,63 @@
                 duration: trimEnd - trimStart
             });
             
+            const processButton = event.target;
+            const originalText = processButton.innerHTML;
+            processButton.disabled = true;
+            processButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+            
             try {
-                // Mostra loading
-                const processButton = event.target;
-                const originalText = processButton.innerHTML;
-                processButton.disabled = true;
-                processButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
-                
-                // Carrega FFmpeg dinamicamente
-                let FFmpeg, fetchFile, toBlobURL;
-                
-                if (window.FFmpegModule) {
-                    // Usa módulo já carregado
-                    ({ FFmpeg, fetchFile, toBlobURL } = window.FFmpegModule);
-                } else {
-                    // Carrega dinamicamente
-                    try {
-                        const ffmpegModule = await import('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js');
-                        const utilModule = await import('https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/esm/index.js');
-                        FFmpeg = ffmpegModule.FFmpeg;
-                        fetchFile = utilModule.fetchFile;
-                        toBlobURL = utilModule.toBlobURL;
-                    } catch (importError) {
-                        throw new Error('Não foi possível carregar FFmpeg: ' + importError.message);
-                    }
-                }
-                const ffmpeg = new FFmpeg();
-                
-                // Log de progresso
-                ffmpeg.on('log', ({ message }) => {
-                    console.log(message);
-                });
-                
-                // Carrega FFmpeg com cores usando toBlobURL
-                const baseURL = 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/esm';
-                await ffmpeg.load({
-                    coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-                    wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-                });
-                
-                // Baixa o vídeo usando fetchFile
+                // Baixa o vídeo original
                 const videoUrl = video.src;
-                await ffmpeg.writeFile('input.mp4', await fetchFile(videoUrl));
+                const response = await fetch(videoUrl);
+                const videoBlob = await response.blob();
                 
-                // Corta o vídeo usando FFmpeg
-                const duration = trimEnd - trimStart;
-                await ffmpeg.exec([
-                    '-i', 'input.mp4',
-                    '-ss', trimStart.toString(),
-                    '-t', duration.toString(),
-                    '-c', 'copy',
-                    'output.mp4'
-                ]);
+                // Cria um arquivo JSON com informações do corte
+                const cutInfo = {
+                    videoUrl: videoUrl,
+                    startTime: trimStart,
+                    endTime: trimEnd,
+                    duration: trimEnd - trimStart,
+                    timestamp: new Date().toISOString()
+                };
                 
-                // Lê o arquivo cortado
-                const data = await ffmpeg.readFile('output.mp4');
+                // Faz download das informações de corte
+                const infoBlob = new Blob([JSON.stringify(cutInfo, null, 2)], { type: 'application/json' });
+                const infoUrl = URL.createObjectURL(infoBlob);
+                const infoLink = document.createElement('a');
+                infoLink.href = infoUrl;
+                infoLink.download = `video_corte_info_${Date.now()}.json`;
+                infoLink.click();
+                URL.revokeObjectURL(infoUrl);
                 
-                // Faz download
-                const blob = new Blob([data.buffer], { type: 'video/mp4' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `video_cortado_${Date.now()}.mp4`;
-                a.click();
-                URL.revokeObjectURL(url);
-                
-                // Limpa arquivos temporários
-                await ffmpeg.deleteFile('input.mp4');
-                await ffmpeg.deleteFile('output.mp4');
+                // Também baixa o vídeo original completo como referência
+                const videoFileUrl = URL.createObjectURL(videoBlob);
+                const videoLink = document.createElement('a');
+                videoLink.href = videoFileUrl;
+                videoLink.download = `video_original_${Date.now()}.mp4`;
+                videoLink.click();
+                URL.revokeObjectURL(videoFileUrl);
                 
                 // Restaura botão
                 processButton.disabled = false;
                 processButton.innerHTML = originalText;
                 
-                alert('Vídeo cortado baixado com sucesso!');
+                alert('✅ Arquivos baixados!\n\n' +
+                      '• Video original completo\n' +
+                      '• Arquivo JSON com tempos de corte\n\n' +
+                      'Use um editor de vídeo profissional para cortar usando os tempos do JSON.');
                 
             } catch (error) {
                 console.error('Erro ao processar vídeo:', error);
                 alert('Erro ao processar vídeo: ' + error.message);
                 
                 // Restaura botão em caso de erro
-                const processButton = event.target;
                 processButton.disabled = false;
-                processButton.innerHTML = '<i class="fas fa-scissors"></i> Processar Vídeo';
+                processButton.innerHTML = '<i class="fas fa-download"></i> Baixar Video + Tempos';
             }
         }
     </script>
     
-    <!-- FFmpeg.wasm via CDN -->
-    <script type="module">
-        (async () => {
-            try {
-                // Importa FFmpeg e utilitários
-                const { FFmpeg } = await import('https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.10/dist/esm/index.js');
-                const { fetchFile, toBlobURL } = await import('https://cdn.jsdelivr.net/npm/@ffmpeg/util@0.12.1/dist/esm/index.js');
-                
-                window.FFmpegModule = { FFmpeg, fetchFile, toBlobURL };
-                console.log('FFmpeg carregado com sucesso');
-            } catch (error) {
-                console.error('Erro ao carregar FFmpeg:', error);
-                window.FFmpegModule = null;
-            }
-        })();
-    </script>
 </body>
 </html>
 
