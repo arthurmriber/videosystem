@@ -615,7 +615,7 @@
                             <i class="fas fa-download"></i> Baixar Vídeo
                         </button>
                         ${details.translated_script || details.script ? `
-                        <button onclick="copyScript('${(details.translated_script || details.script).replace(/'/g, "\\'")}')" style="background: #1a1a1a; color: #fff; border: 1px solid #252525; border-radius: 8px; padding: 0.75rem 1.5rem; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">
+                        <button onclick="copyScript('${(details.translated_script || details.script).replace(/'/g, "\\'")}', this)" style="background: #1a1a1a; color: #fff; border: 1px solid #252525; border-radius: 8px; padding: 0.75rem 1.5rem; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">
                             <i class="fas fa-copy"></i> Copiar Script
                         </button>
                         ` : ''}
@@ -741,32 +741,28 @@
 
         async function downloadVideo(videoUrl, title) {
             try {
-                const response = await fetch(videoUrl);
-                const videoBlob = await response.blob();
-                
-                const url = URL.createObjectURL(videoBlob);
+                // Usa link direto para evitar bloqueio de conteúdo misto
                 const a = document.createElement('a');
-                a.href = url;
+                a.href = videoUrl;
                 a.download = `${title.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.mp4`;
+                a.target = '_blank';
                 a.click();
-                URL.revokeObjectURL(url);
             } catch (error) {
                 console.error('Erro ao baixar vídeo:', error);
                 alert('Erro ao baixar vídeo. Tente novamente.');
             }
         }
 
-        function copyScript(script) {
+        function copyScript(script, buttonElement) {
             navigator.clipboard.writeText(script).then(() => {
                 // Feedback visual
-                const button = event.target.closest('button');
-                const originalText = button.innerHTML;
-                button.innerHTML = '<i class="fas fa-check"></i> Copiado!';
-                button.style.borderColor = '#FFD11A';
+                const originalText = buttonElement.innerHTML;
+                buttonElement.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+                buttonElement.style.borderColor = '#FFD11A';
                 
                 setTimeout(() => {
-                    button.innerHTML = originalText;
-                    button.style.borderColor = '#252525';
+                    buttonElement.innerHTML = originalText;
+                    buttonElement.style.borderColor = '#252525';
                 }, 2000);
             }).catch(error => {
                 console.error('Erro ao copiar:', error);
