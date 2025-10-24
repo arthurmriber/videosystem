@@ -745,7 +745,6 @@
                 const a = document.createElement('a');
                 a.href = videoUrl;
                 a.download = `${title.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.mp4`;
-                a.target = '_blank';
                 a.click();
             } catch (error) {
                 console.error('Erro ao baixar vídeo:', error);
