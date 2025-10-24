@@ -573,62 +573,8 @@
 </head>
 <body>
     <div class="container">
-        <!-- Tela 1: Escolha do tipo de vídeo -->
+        <!-- Tela 1: Biblioteca de vídeos -->
         <div class="screen active" id="screen-1">
-            <h1>Escolha o tipo de vídeo</h1>
-            
-            <div class="options-grid">
-                <div class="option-card" onclick="selectOption('jornalistico')">
-                    <i class="fas fa-newspaper option-icon"></i>
-                    <h2 class="option-title">Vídeo Jornalístico</h2>
-                    <p class="option-description">
-                        Estrutura profissional para reportagens e conteúdo informativo
-                    </p>
-                </div>
-
-                <div class="option-card" onclick="selectOption('normal')">
-                    <i class="fas fa-video option-icon"></i>
-                    <h2 class="option-title">Vídeo Normal</h2>
-                    <p class="option-description">
-                        Formatação tradicional com liberdade criativa
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tela 2: Escolha da fonte do vídeo jornalístico -->
-        <div class="screen" id="screen-2">
-            <div class="back-button" onclick="goBack()">
-                <i class="fas fa-arrow-left"></i>
-                Voltar
-            </div>
-            <h1>Vídeo Jornalístico</h1>
-            
-            <div class="options-grid">
-                <div class="option-card" onclick="selectVideoSource('upload')">
-                    <i class="fas fa-upload option-icon"></i>
-                    <h2 class="option-title">Enviar próprio vídeo</h2>
-                    <p class="option-description">
-                        Faça upload do seu arquivo de vídeo
-                    </p>
-                </div>
-
-                <div class="option-card" onclick="selectVideoSource('library')">
-                    <i class="fas fa-folder-open option-icon"></i>
-                    <h2 class="option-title">Procurar da biblioteca</h2>
-                    <p class="option-description">
-                        Escolha de vídeos disponíveis na biblioteca
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tela 3: Biblioteca de vídeos -->
-        <div class="screen" id="screen-3">
-            <div class="back-button" onclick="goBackFromLibrary()">
-                <i class="fas fa-arrow-left"></i>
-                Voltar
-            </div>
             <h1>Biblioteca de Vídeos</h1>
             
             <div class="search-bar">
@@ -647,8 +593,8 @@
             </div>
         </div>
 
-        <!-- Tela 4: Detalhes do vídeo -->
-        <div class="screen" id="screen-4">
+        <!-- Tela 2: Detalhes do vídeo -->
+        <div class="screen" id="screen-2">
             <div class="back-button" onclick="goBackFromDetail()">
                 <i class="fas fa-arrow-left"></i>
                 Voltar
@@ -660,101 +606,16 @@
                 </div>
             </div>
         </div>
-
-        <!-- Tela 5: Editor de vídeo -->
-        <div class="screen" id="screen-5">
-            <div class="back-button" onclick="goBackFromEditor()">
-                <i class="fas fa-arrow-left"></i>
-                Voltar
-            </div>
-            <h1>Cortar Vídeo</h1>
-            
-            <div class="editor-container">
-                <div class="editor-section">
-                    <div class="editor-section-title">Preview</div>
-                    <div class="video-detail-player" id="editor-player">
-                        <video id="editor-video" preload="metadata"></video>
-                        <div class="custom-player-overlay" onclick="toggleEditorPlay()">
-                            <button class="play-button" id="editor-play-pause-btn">
-                                <i class="fas fa-play" id="editor-play-pause-icon"></i>
-                            </button>
-                        </div>
-                        <div class="custom-player-controls">
-                            <div class="progress-bar-container" onclick="seekEditor(event)">
-                                <div class="progress-bar" id="editor-progress-bar"></div>
-                            </div>
-                            <div class="controls-bottom">
-                                <span class="time-display" id="editor-time-display">0:00 / 0:00</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="editor-section">
-                    <div class="editor-section-title">Cortar</div>
-                    <div class="trim-controls">
-                        <div class="trim-control-row">
-                            <div class="trim-control-label">Início:</div>
-                            <input type="text" id="trim-start-input" class="trim-input" value="0:00" oninput="updateTrimStart()">
-                        </div>
-                        <div class="trim-control-row">
-                            <div class="trim-control-label">Fim:</div>
-                            <input type="text" id="trim-end-input" class="trim-input" value="0:00" oninput="updateTrimEnd()">
-                        </div>
-                        <div class="trim-control-row">
-                            <div class="trim-control-label">Seleção:</div>
-                            <div class="trim-slider-container" id="trim-slider">
-                                <div class="trim-slider-track">
-                                    <div class="trim-range" id="trim-range"></div>
-                                    <div class="trim-handle start" id="trim-handle-start">
-                                        <div class="trim-tooltip" id="trim-tooltip-start">0:00.00</div>
-                                    </div>
-                                    <div class="trim-handle end" id="trim-handle-end">
-                                        <div class="trim-tooltip" id="trim-tooltip-end">0:00.00</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="action-buttons">
-                    <button class="action-button" onclick="goBackFromEditor()">Cancelar</button>
-                    <button class="action-button primary" onclick="processVideo()">
-                        <i class="fas fa-download"></i> Baixar Video + Tempos
-                    </button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>
         let currentQuery = '';
 
-        function selectOption(type) {
-            if (type === 'jornalistico') {
-                // Mostra a tela 2 (escolha da fonte)
-                document.getElementById('screen-1').classList.remove('active');
-                document.getElementById('screen-2').classList.add('active');
-            } else {
-                // Vídeo normal - por enquanto apenas log
-                console.log('Vídeo Normal selecionado');
-                alert('Vídeo Normal selecionado');
-            }
-        }
-
-        function goBack() {
-            // Volta para a tela 1
-            document.getElementById('screen-2').classList.remove('active');
-            document.getElementById('screen-1').classList.add('active');
-        }
-
-        function goBackFromLibrary() {
-            // Volta para a tela 2
-            document.getElementById('screen-3').classList.remove('active');
-            document.getElementById('screen-2').classList.add('active');
-            document.body.classList.remove('library-view');
-        }
+        // Carrega vídeos automaticamente ao abrir a página
+        window.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.add('library-view');
+            loadVideos();
+        });
 
         function goBackFromDetail() {
             // Limpa o conteúdo dos detalhes
@@ -765,29 +626,10 @@
                 </div>
             `;
             
-            // Volta para a tela 3 (biblioteca)
-            document.getElementById('screen-4').classList.remove('active');
-            document.getElementById('screen-3').classList.add('active');
+            // Volta para a tela 1 (biblioteca)
+            document.getElementById('screen-2').classList.remove('active');
+            document.getElementById('screen-1').classList.add('active');
             document.body.classList.add('library-view');
-        }
-
-        async function selectVideoSource(source) {
-            if (source === 'library') {
-                // Mostra a tela 3 (biblioteca)
-                document.getElementById('screen-2').classList.remove('active');
-                document.getElementById('screen-3').classList.add('active');
-                document.body.classList.add('library-view');
-                
-                // Reset query
-                currentQuery = '';
-                document.getElementById('search-input').value = '';
-                
-                // Busca vídeos da API
-                await loadVideos();
-            } else {
-                console.log('Upload selecionado');
-                alert('Enviar próprio vídeo selecionado');
-            }
         }
 
         async function loadVideos() {
@@ -855,9 +697,9 @@
                 </div>
             `;
             
-            // Mostra a tela 4 (detalhes)
-            document.getElementById('screen-3').classList.remove('active');
-            document.getElementById('screen-4').classList.add('active');
+            // Mostra a tela 2 (detalhes)
+            document.getElementById('screen-1').classList.remove('active');
+            document.getElementById('screen-2').classList.add('active');
             
             // Carrega detalhes do vídeo
             await loadVideoDetails(video.id);
@@ -944,10 +786,15 @@
                         ${details.duration_ms ? ` · ${Math.floor(details.duration_ms / 1000)}s` : ''}
                     </div>
                     
-                    <div style="margin: 2rem 0;">
-                        <button onclick="openVideoEditor('${videoUrl}', '${details.translated_headline || details.headline}')" style="background: #FFD11A; color: #141414; border: none; border-radius: 8px; padding: 0.75rem 2rem; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">
-                            <i class="fas fa-scissors"></i> Cortar Vídeo
+                    <div style="display: flex; gap: 1rem; margin: 2rem 0;">
+                        <button onclick="downloadVideo('${videoUrl}', '${details.translated_headline || details.headline}')" style="background: #FFD11A; color: #141414; border: none; border-radius: 8px; padding: 0.75rem 1.5rem; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">
+                            <i class="fas fa-download"></i> Baixar Vídeo
                         </button>
+                        ${details.translated_script || details.script ? `
+                        <button onclick="copyScript('${(details.translated_script || details.script).replace(/'/g, "\\'")}')" style="background: #1a1a1a; color: #fff; border: 1px solid #252525; border-radius: 8px; padding: 0.75rem 1.5rem; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s ease;">
+                            <i class="fas fa-copy"></i> Copiar Script
+                        </button>
+                        ` : ''}
                     </div>
                     
                     ${details.translated_description || details.description ? `
@@ -1068,309 +915,39 @@
             return `${mins}:${secs.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
         }
 
-        // Funções do editor de vídeo
-        let trimStart = 0;
-        let trimEnd = 0;
-        let videoDuration = 0;
-
-        function openVideoEditor(videoUrl, title) {
-            trimStart = 0;
-            trimEnd = 0;
-            
-            // Mostra a tela 5 (editor)
-            document.getElementById('screen-4').classList.remove('active');
-            document.getElementById('screen-5').classList.add('active');
-            
-            // Carrega o vídeo no editor
-            const video = document.getElementById('editor-video');
-            video.src = videoUrl;
-            video.load();
-            
-            video.addEventListener('loadedmetadata', () => {
-                videoDuration = video.duration;
-                trimEnd = videoDuration;
-                updateTrimUI();
-                setupEditorPlayer();
-                setupTrimHandles();
-            });
-        }
-
-        function setupTrimHandles() {
-            const slider = document.getElementById('trim-slider');
-            const handleStart = document.getElementById('trim-handle-start');
-            const handleEnd = document.getElementById('trim-handle-end');
-            
-            let isDragging = false;
-            let currentHandle = null;
-            
-            handleStart.addEventListener('mousedown', (e) => {
-                isDragging = true;
-                currentHandle = 'start';
-                handleStart.classList.add('is-dragging');
-                e.preventDefault();
-            });
-            
-            handleEnd.addEventListener('mousedown', (e) => {
-                isDragging = true;
-                currentHandle = 'end';
-                handleEnd.classList.add('is-dragging');
-                e.preventDefault();
-            });
-            
-            document.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
-                
-                const rect = slider.getBoundingClientRect();
-                const percent = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-                const seconds = (percent / 100) * videoDuration;
-                
-                if (currentHandle === 'start') {
-                    if (seconds < trimEnd) {
-                        trimStart = seconds;
-                        document.getElementById('trim-start-input').value = formatTime(trimStart);
-                        document.getElementById('trim-tooltip-start').textContent = formatTime(trimStart);
-                        
-                        // Move o vídeo e reproduz automaticamente
-                        const video = document.getElementById('editor-video');
-                        if (video) {
-                            video.currentTime = trimStart;
-                            video.play();
-                        }
-                    }
-                } else if (currentHandle === 'end') {
-                    if (seconds > trimStart) {
-                        trimEnd = seconds;
-                        document.getElementById('trim-end-input').value = formatTime(trimEnd);
-                        document.getElementById('trim-tooltip-end').textContent = formatTime(trimEnd);
-                        
-                        // Reproduz automaticamente se o vídeo estiver dentro do range
-                        const video = document.getElementById('editor-video');
-                        if (video && video.currentTime >= trimStart && video.currentTime < trimEnd) {
-                            video.play();
-                        }
-                    }
-                }
-                
-                updateTrimUI();
-            });
-            
-            document.addEventListener('mouseup', () => {
-                isDragging = false;
-                currentHandle = null;
-                handleStart.classList.remove('is-dragging');
-                handleEnd.classList.remove('is-dragging');
-            });
-        }
-
-        function goBackFromEditor() {
-            document.getElementById('screen-5').classList.remove('active');
-            document.getElementById('screen-4').classList.add('active');
-        }
-
-        function setupEditorPlayer() {
-            const video = document.getElementById('editor-video');
-            if (!video) return;
-
-            const playIcon = document.getElementById('editor-play-pause-icon');
-            const progressBar = document.getElementById('editor-progress-bar');
-            const timeDisplay = document.getElementById('editor-time-display');
-
-            video.addEventListener('timeupdate', () => {
-                // Pausa se passar do fim do trim
-                if (video.currentTime >= trimEnd) {
-                    video.pause();
-                    video.currentTime = trimEnd;
-                }
-                
-                // Reproduz apenas dentro do range de trim
-                if (video.currentTime < trimStart) {
-                    video.currentTime = trimStart;
-                }
-                
-                const percent = (video.currentTime / video.duration) * 100;
-                progressBar.style.width = percent + '%';
-                
-                const current = formatTime(video.currentTime);
-                const total = formatTime(video.duration);
-                timeDisplay.textContent = `${current} / ${total}`;
-            });
-
-            video.addEventListener('play', () => {
-                playIcon.classList.remove('fa-play');
-                playIcon.classList.add('fa-pause');
-                
-                // Se estiver no final, volta para o início (replay)
-                if (video.currentTime >= trimEnd) {
-                    video.currentTime = trimStart;
-                }
-                
-                // Garante que começe do trimStart
-                if (video.currentTime < trimStart) {
-                    video.currentTime = trimStart;
-                }
-            });
-
-            video.addEventListener('pause', () => {
-                playIcon.classList.remove('fa-pause');
-                playIcon.classList.add('fa-play');
-            });
-        }
-
-        function toggleEditorPlay() {
-            const video = document.getElementById('editor-video');
-            if (!video) return;
-
-            if (video.paused) {
-                video.play();
-            } else {
-                video.pause();
-            }
-        }
-
-        function seekEditor(event) {
-            const video = document.getElementById('editor-video');
-            if (!video) return;
-
-            const progressBar = event.currentTarget;
-            const rect = progressBar.getBoundingClientRect();
-            const percent = (event.clientX - rect.left) / rect.width;
-            video.currentTime = percent * video.duration;
-        }
-
-        function updateTrimUI() {
-            document.getElementById('trim-start-input').value = formatTime(trimStart);
-            document.getElementById('trim-end-input').value = formatTime(trimEnd);
-            
-            const startPercent = (trimStart / videoDuration) * 100;
-            const endPercent = (trimEnd / videoDuration) * 100;
-            const width = endPercent - startPercent;
-            
-            document.getElementById('trim-range').style.left = startPercent + '%';
-            document.getElementById('trim-range').style.width = width + '%';
-            document.getElementById('trim-handle-start').style.left = startPercent + '%';
-            document.getElementById('trim-handle-end').style.left = endPercent + '%';
-            
-            // Atualiza tooltips
-            document.getElementById('trim-tooltip-start').textContent = formatTime(trimStart);
-            document.getElementById('trim-tooltip-end').textContent = formatTime(trimEnd);
-        }
-
-        function updateTrimStart() {
-            const input = document.getElementById('trim-start-input').value;
-            const seconds = parseTime(input);
-            if (seconds !== null && seconds < trimEnd) {
-                trimStart = seconds;
-                updateTrimUI();
-                
-                // Move o vídeo para o tempo de início e reproduz automaticamente
-                const video = document.getElementById('editor-video');
-                if (video) {
-                    video.currentTime = trimStart;
-                    video.play();
-                }
-            }
-        }
-
-        function updateTrimEnd() {
-            const input = document.getElementById('trim-end-input').value;
-            const seconds = parseTime(input);
-            if (seconds !== null && seconds > trimStart && seconds <= videoDuration) {
-                trimEnd = seconds;
-                updateTrimUI();
-                
-                const video = document.getElementById('editor-video');
-                if (video) {
-                    // Pausa o vídeo se passar do fim
-                    if (video.currentTime > trimEnd) {
-                        video.pause();
-                        video.currentTime = trimEnd;
-                    } else if (video.currentTime >= trimStart && video.currentTime < trimEnd) {
-                        // Reproduz automaticamente se estiver dentro do range
-                        video.play();
-                    }
-                }
-            }
-        }
-
-        function parseTime(timeStr) {
-            const parts = timeStr.split(':');
-            if (parts.length === 2) {
-                const mins = parseInt(parts[0]);
-                const secParts = parts[1].split('.');
-                const secs = parseInt(secParts[0]);
-                const ms = secParts[1] ? parseInt(secParts[1]) : 0;
-                
-                if (!isNaN(mins) && !isNaN(secs)) {
-                    return mins * 60 + secs + (ms / 100);
-                }
-            }
-            return null;
-        }
-
-        async function processVideo() {
-            const video = document.getElementById('editor-video');
-            if (!video) return;
-            
-            console.log('Processando vídeo:', {
-                start: trimStart,
-                end: trimEnd,
-                duration: trimEnd - trimStart
-            });
-            
-            const processButton = event.target;
-            const originalText = processButton.innerHTML;
-            processButton.disabled = true;
-            processButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
-            
+        async function downloadVideo(videoUrl, title) {
             try {
-                // Baixa o vídeo original
-                const videoUrl = video.src;
                 const response = await fetch(videoUrl);
                 const videoBlob = await response.blob();
                 
-                // Cria um arquivo JSON com informações do corte
-                const cutInfo = {
-                    videoUrl: videoUrl,
-                    startTime: trimStart,
-                    endTime: trimEnd,
-                    duration: trimEnd - trimStart,
-                    timestamp: new Date().toISOString()
-                };
-                
-                // Faz download das informações de corte
-                const infoBlob = new Blob([JSON.stringify(cutInfo, null, 2)], { type: 'application/json' });
-                const infoUrl = URL.createObjectURL(infoBlob);
-                const infoLink = document.createElement('a');
-                infoLink.href = infoUrl;
-                infoLink.download = `video_corte_info_${Date.now()}.json`;
-                infoLink.click();
-                URL.revokeObjectURL(infoUrl);
-                
-                // Também baixa o vídeo original completo como referência
-                const videoFileUrl = URL.createObjectURL(videoBlob);
-                const videoLink = document.createElement('a');
-                videoLink.href = videoFileUrl;
-                videoLink.download = `video_original_${Date.now()}.mp4`;
-                videoLink.click();
-                URL.revokeObjectURL(videoFileUrl);
-                
-                // Restaura botão
-                processButton.disabled = false;
-                processButton.innerHTML = originalText;
-                
-                alert('✅ Arquivos baixados!\n\n' +
-                      '• Video original completo\n' +
-                      '• Arquivo JSON com tempos de corte\n\n' +
-                      'Use um editor de vídeo profissional para cortar usando os tempos do JSON.');
-                
+                const url = URL.createObjectURL(videoBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${title.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.mp4`;
+                a.click();
+                URL.revokeObjectURL(url);
             } catch (error) {
-                console.error('Erro ao processar vídeo:', error);
-                alert('Erro ao processar vídeo: ' + error.message);
-                
-                // Restaura botão em caso de erro
-                processButton.disabled = false;
-                processButton.innerHTML = '<i class="fas fa-download"></i> Baixar Video + Tempos';
+                console.error('Erro ao baixar vídeo:', error);
+                alert('Erro ao baixar vídeo. Tente novamente.');
             }
+        }
+
+        function copyScript(script) {
+            navigator.clipboard.writeText(script).then(() => {
+                // Feedback visual
+                const button = event.target.closest('button');
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+                button.style.borderColor = '#FFD11A';
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.borderColor = '#252525';
+                }, 2000);
+            }).catch(error => {
+                console.error('Erro ao copiar:', error);
+                alert('Erro ao copiar script. Tente selecionar manualmente.');
+            });
         }
     </script>
     
