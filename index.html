@@ -611,8 +611,34 @@
 </head>
 <body>
     <div class="container">
+        <!-- Tela 0: Escolha inicial -->
+        <div class="screen active" id="screen-0">
+            <h1>Escolha o tipo de vídeo</h1>
+            <div class="options-grid">
+                <div class="option-card" onclick="goToLibrary()">
+                    <div class="option-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <div class="option-title">Escolher da Biblioteca</div>
+                    <div class="option-description">Escolha um vídeo da biblioteca da Associated Press</div>
+                </div>
+                <div class="option-card" onclick="document.getElementById('file-input').click()">
+                    <div class="option-icon">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <div class="option-title">Fazer Upload</div>
+                    <div class="option-description">Envie um vídeo do seu computador</div>
+                </div>
+            </div>
+            <input type="file" id="file-input" accept="video/*" style="display: none;" onchange="handleFileUpload(event)">
+        </div>
+
         <!-- Tela 1: Biblioteca de vídeos -->
-        <div class="screen active" id="screen-1">
+        <div class="screen" id="screen-1">
+            <div class="back-button" onclick="goBackToHome()">
+                <i class="fas fa-arrow-left"></i>
+                Voltar
+            </div>
             <h1>Biblioteca de Vídeos</h1>
             
             <div class="search-bar">
@@ -704,10 +730,8 @@
     <script>
         let currentQuery = '';
 
-        // Carrega vídeos automaticamente ao abrir a página
         window.addEventListener('DOMContentLoaded', () => {
-            document.body.classList.add('library-view');
-            loadVideos();
+            // Não carrega vídeos automaticamente - espera o usuário escolher
             
             // Verifica se FFmpeg foi carregado
             setTimeout(() => {
@@ -746,6 +770,32 @@
             document.getElementById('screen-2').classList.remove('active');
             document.getElementById('screen-1').classList.add('active');
             document.body.classList.add('library-view');
+        }
+
+        function goBackToHome() {
+            // Volta para a tela inicial
+            document.getElementById('screen-1').classList.remove('active');
+            document.getElementById('screen-0').classList.add('active');
+            document.body.classList.remove('library-view');
+        }
+
+        function goToLibrary() {
+            // Mostra a biblioteca
+            document.getElementById('screen-0').classList.remove('active');
+            document.getElementById('screen-1').classList.add('active');
+            document.body.classList.add('library-view');
+            loadVideos();
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Cria um URL local para o arquivo
+            const videoUrl = URL.createObjectURL(file);
+            
+            // Abre o modal de corte diretamente
+            openCutModal(videoUrl, file.name);
         }
 
         async function loadVideos() {
@@ -867,19 +917,16 @@
                 videoUrl = details.url || details.thumbnail;
             }
             
-            // Converte HTTP para HTTPS (requerido em páginas HTTPS)
-            if (videoUrl && videoUrl.startsWith('http://')) {
-                videoUrl = videoUrl.replace('http://', 'https://');
+            // Força HTTP (alguns navegadores convertem automaticamente para HTTPS)
+            if (videoUrl && videoUrl.startsWith('https://')) {
+                videoUrl = videoUrl.replace('https://', 'http://');
             }
-            
-            // Usa proxy para evitar problemas de CORS com COEP/COOP
-            const videoUrlForPlayer = videoUrl ? `/proxy-video?url=${encodeURIComponent(videoUrl)}` : '';
             
             container.innerHTML = `
                 <div class="video-detail-container">
                     <div class="video-detail-player">
-                        <video id="custom-video-player" poster="${details.thumbnail}" preload="metadata" crossorigin="anonymous" onerror="handleVideoError(this)">
-                            <source src="${videoUrlForPlayer}" type="video/mp4">
+                        <video id="custom-video-player" poster="${details.thumbnail}" preload="metadata" onerror="handleVideoError(this)">
+                            <source src="${videoUrl}" type="video/mp4">
                             Seu navegador não suporta vídeo HTML5.
                         </video>
                         <div class="custom-player-overlay" onclick="togglePlay()">
@@ -1188,11 +1235,9 @@
                 await ffmpeg.load();
                 console.log('✅ FFmpeg carregado com sucesso!');
                 
-                // Faz o download do vídeo usando proxy para evitar CORS
+                // Faz o download do vídeo usando fetchFile
                 console.log('📥 Baixando vídeo:', currentVideoUrl);
-                const proxyUrl = `/proxy-video?url=${encodeURIComponent(currentVideoUrl)}`;
-                console.log('🔗 Usando proxy:', proxyUrl);
-                const videoData = await fetchFile(proxyUrl);
+                const videoData = await fetchFile(currentVideoUrl);
                 console.log('✅ Vídeo baixado, tamanho:', videoData.length, 'bytes');
                 
                 // Escreve o arquivo no sistema de arquivos virtual do ffmpeg
