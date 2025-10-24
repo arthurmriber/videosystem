@@ -607,66 +607,185 @@
             color: #FFD11A;
             font-size: 1rem;
         }
+
+        /* Drag and Drop Styles */
+        .upload-container {
+            background: #1a1a1a;
+            border: 2px dashed #252525;
+            border-radius: 16px;
+            padding: 4rem 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-container:hover {
+            border-color: #FFD11A;
+            background: #1f1f1f;
+        }
+
+        .upload-container.dragover {
+            border-color: #FFD11A;
+            background: #252525;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: #FFD11A;
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-description {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-button {
+            background: #FFD11A;
+            color: #141414;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .upload-button:hover {
+            background: #FFE066;
+            transform: translateY(-2px);
+        }
+
+        .action-menu {
+            background: #1a1a1a;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .action-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .action-button {
+            background: #252525;
+            border: 1px solid #252525;
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .action-button:hover {
+            border-color: #FFD11A;
+            background: #1f1f1f;
+        }
+
+        .action-button-icon {
+            font-size: 1.5rem;
+            color: #FFD11A;
+            margin-bottom: 0.5rem;
+        }
+
+        .action-button-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #ffffff;
+        }
+
+        .file-info {
+            background: #252525;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .file-icon {
+            font-size: 2rem;
+            color: #FFD11A;
+        }
+
+        .file-details {
+            flex: 1;
+            text-align: left;
+        }
+
+        .file-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #ffffff;
+            margin-bottom: 0.25rem;
+        }
+
+        .file-size {
+            font-size: 0.75rem;
+            color: #666;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Tela 0: Escolha inicial -->
+        <!-- Tela 0: Upload com Drag and Drop -->
         <div class="screen active" id="screen-0">
-            <h1>Escolha o tipo de vídeo</h1>
-            <div class="options-grid">
-                <div class="option-card" onclick="goToLibrary()">
-                    <div class="option-icon">
-                        <i class="fas fa-video"></i>
-                    </div>
-                    <div class="option-title">Escolher da Biblioteca</div>
-                    <div class="option-description">Escolha um vídeo da biblioteca da Associated Press</div>
+            <h1>Editor de Vídeo</h1>
+            
+            <div class="upload-container" id="upload-container" onclick="document.getElementById('file-input').click()">
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
                 </div>
-                <div class="option-card" onclick="document.getElementById('file-input').click()">
-                    <div class="option-icon">
-                        <i class="fas fa-upload"></i>
-                    </div>
-                    <div class="option-title">Fazer Upload</div>
-                    <div class="option-description">Envie um vídeo do seu computador</div>
-                </div>
+                <div class="upload-title">Arraste seu vídeo aqui</div>
+                <div class="upload-description">ou clique para selecionar um arquivo</div>
+                <button class="upload-button">Escolher Arquivo</button>
             </div>
+            
             <input type="file" id="file-input" accept="video/*" style="display: none;" onchange="handleFileUpload(event)">
-        </div>
-
-        <!-- Tela 1: Biblioteca de vídeos -->
-        <div class="screen" id="screen-1">
-            <div class="back-button" onclick="goBackToHome()">
-                <i class="fas fa-arrow-left"></i>
-                Voltar
-            </div>
-            <h1>Biblioteca de Vídeos</h1>
             
-            <div class="search-bar">
-                <input type="text" id="search-input" class="search-input" placeholder="Buscar vídeos..." onkeypress="handleSearchKeyPress(event)">
-                <button onclick="performSearch()" class="search-button">
-                    <i class="fas fa-search"></i>
-                    Buscar
-                </button>
-            </div>
-            
-            <div id="videos-container">
-                <div class="loading">
-                    <i class="fas fa-spinner"></i>
-                    <p style="margin-top: 1rem;">Carregando vídeos...</p>
+            <div id="file-info" style="display: none;">
+                <div class="file-info">
+                    <div class="file-icon">
+                        <i class="fas fa-file-video"></i>
+                    </div>
+                    <div class="file-details">
+                        <div class="file-name" id="file-name"></div>
+                        <div class="file-size" id="file-size"></div>
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Tela 2: Detalhes do vídeo -->
-        <div class="screen" id="screen-2">
-            <div class="back-button" onclick="goBackFromDetail()">
-                <i class="fas fa-arrow-left"></i>
-                Voltar
-            </div>
-            <div id="video-detail-content">
-                <div class="loading">
-                    <i class="fas fa-spinner"></i>
-                    <p style="margin-top: 1rem;">Carregando detalhes...</p>
+                
+                <div class="action-menu">
+                    <div class="action-title">O que você gostaria de fazer?</div>
+                    <div class="action-buttons">
+                        <div class="action-button" onclick="handleCutVideo()">
+                            <div class="action-button-icon">
+                                <i class="fas fa-cut"></i>
+                            </div>
+                            <div class="action-button-title">Cortar Vídeo</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -728,10 +847,10 @@
     </div>
 
     <script>
-        let currentQuery = '';
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Não carrega vídeos automaticamente - espera o usuário escolher
+            // Inicializa drag and drop
+            initDragAndDrop();
             
             // Verifica se FFmpeg foi carregado
             setTimeout(() => {
@@ -757,45 +876,76 @@
             }, 1000);
         });
 
-        function goBackFromDetail() {
-            // Limpa o conteúdo dos detalhes
-            document.getElementById('video-detail-content').innerHTML = `
-                <div class="loading">
-                    <i class="fas fa-spinner"></i>
-                    <p style="margin-top: 1rem;">Carregando detalhes...</p>
-                </div>
-            `;
-            
-            // Volta para a tela 1 (biblioteca)
-            document.getElementById('screen-2').classList.remove('active');
-            document.getElementById('screen-1').classList.add('active');
-            document.body.classList.add('library-view');
-        }
+        let currentVideoFile = null;
+        let currentVideoUrl = null;
 
-        function goBackToHome() {
-            // Volta para a tela inicial
-            document.getElementById('screen-1').classList.remove('active');
-            document.getElementById('screen-0').classList.add('active');
-            document.body.classList.remove('library-view');
-        }
+        // Drag and Drop functionality
+        function initDragAndDrop() {
+            const uploadContainer = document.getElementById('upload-container');
+            const fileInput = document.getElementById('file-input');
 
-        function goToLibrary() {
-            // Mostra a biblioteca
-            document.getElementById('screen-0').classList.remove('active');
-            document.getElementById('screen-1').classList.add('active');
-            document.body.classList.add('library-view');
-            loadVideos();
+            // Prevent default drag behaviors
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadContainer.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            // Highlight drop area when item is dragged over it
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadContainer.addEventListener(eventName, () => {
+                    uploadContainer.classList.add('dragover');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadContainer.addEventListener(eventName, () => {
+                    uploadContainer.classList.remove('dragover');
+                }, false);
+            });
+
+            // Handle dropped files
+            uploadContainer.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    handleFileUpload({ target: { files: files } });
+                }
+            }
         }
 
         function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            // Cria um URL local para o arquivo
-            const videoUrl = URL.createObjectURL(file);
-            
-            // Abre o modal de corte diretamente
-            openCutModal(videoUrl, file.name);
+            currentVideoFile = file;
+            currentVideoUrl = URL.createObjectURL(file);
+
+            // Mostra informações do arquivo
+            document.getElementById('file-name').textContent = file.name;
+            document.getElementById('file-size').textContent = formatFileSize(file.size);
+            document.getElementById('file-info').style.display = 'block';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function handleCutVideo() {
+            if (!currentVideoUrl) return;
+            openCutModal(currentVideoUrl, currentVideoFile.name);
         }
 
         async function loadVideos() {
@@ -1116,7 +1266,6 @@
         }
 
         // Variáveis globais para o modal de corte
-        let currentVideoUrl = '';
         let currentVideoTitle = '';
         let currentVideoDuration = 0;
 
